@@ -24,7 +24,7 @@ export default function AdPlaceholder({ size, className, label = true }: AdPlace
       case '320x50':
         return { width: 320, height: 50, class: 'w-full max-w-[320px] h-[50px]' };
       case 'responsive':
-        return { width: '100%', height: 'auto', class: 'w-full aspect-[2/1] md:aspect-[4/1]' };
+        return { width: '100%', height: 'auto', class: 'w-full aspect-[4/1] md:aspect-[6/1]' };
       default:
         return { width: '100%', height: 'auto', class: 'w-full aspect-[2/1]' };
     }
@@ -33,9 +33,15 @@ export default function AdPlaceholder({ size, className, label = true }: AdPlace
   const dimensions = getDimensions();
   
   return (
-    <div className={cn('ad-placeholder rounded-md overflow-hidden', dimensions.class, className)}>
+    <div 
+      className={cn(
+        'relative flex items-center justify-center border rounded-md overflow-hidden animate-ad-glow bg-gradient-to-r from-background/80 to-card/90 backdrop-blur-sm',
+        dimensions.class, 
+        className
+      )}
+    >
       {label && (
-        <span className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/50 backdrop-blur-sm px-2 py-0.5 rounded-sm">
+        <span className="absolute top-2 left-2 text-xs font-medium text-muted-foreground bg-background/70 dark:bg-background/40 backdrop-blur-sm px-2 py-0.5 rounded-sm">
           Iklan
         </span>
       )}
