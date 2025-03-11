@@ -1,8 +1,6 @@
 
-import matter from 'gray-matter';
-
 export interface PostMetadata {
-  id?: number; // ID bersifat opsional
+  id?: number;
   title: string;
   date: string;
   excerpt: string;
@@ -16,6 +14,9 @@ export interface PostMetadata {
 export interface Post extends PostMetadata {
   content: string;
 }
+
+// These functions are kept for compatibility but will be deprecated
+// in favor of direct server imports
 
 export async function getAllPosts(): Promise<PostMetadata[]> {
   try {

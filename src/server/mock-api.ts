@@ -1,65 +1,50 @@
 
-// This file simulates API endpoints that would serve markdown files
-// In a real application, you would use a server-side solution
-
 import { Post, PostMetadata } from '../utils/markdown';
+import matter from 'gray-matter';
 
-const BASE_URL = '/blogposts';
+// Use Vite's import.meta.glob to dynamically import all markdown files
+const markdownFiles = import.meta.glob('/public/blogposts/**/*.md', { as: 'raw', eager: true });
 
-// Function to generate a slug from a filename
-function generateSlug(filename: string): string {
-  return filename.replace(/\.md$/, '');
+// Function to generate a slug from a filepath
+function generateSlug(filepath: string): string {
+  // Extract the filename without extension from the path
+  // Remove '/public/blogposts/' prefix and '.md' suffix
+  return filepath
+    .replace('/public/blogposts/', '')
+    .replace('.md', '');
 }
 
-// Function to read and parse a markdown file
-async function readMarkdownFile(path: string): Promise<{ metadata: any, content: string } | null> {
+// Function to parse a markdown file
+function parseMarkdownFile(filepath: string, content: string): { metadata: PostMetadata, content: string } | null {
   try {
-    console.log(`Attempting to fetch markdown file at: ${path}`);
-    const response = await fetch(path);
-    if (!response.ok) {
-      console.error(`Failed to fetch markdown file: ${path}, status: ${response.status}`);
-      throw new Error(`Failed to fetch markdown file: ${path}`);
-    }
-    const text = await response.text();
+    console.log(`Parsing markdown file: ${filepath}`);
     
-    // Extract front matter and content
-    const pattern = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/;
-    const match = text.match(pattern);
+    // Use gray-matter to parse frontmatter
+    const { data, content: markdownContent } = matter(content);
     
-    if (!match) {
-      console.error(`No front matter found in: ${path}, checking file content...`);
-      console.log(`File content preview: ${text.substring(0, 150)}...`);
+    if (!data.title) {
+      console.error(`Missing required frontmatter in: ${filepath}`);
       return null;
     }
     
-    const frontMatter = match[1];
-    const content = match[2];
+    const slug = generateSlug(filepath);
     
-    // Parse front matter
-    const metadata: Record<string, string> = {};
-    const lines = frontMatter.split(/\r?\n/);
+    const metadata: PostMetadata = {
+      ...data,
+      title: data.title,
+      date: data.date,
+      excerpt: data.excerpt || '',
+      cover: data.cover || '',
+      category: data.category || 'Uncategorized',
+      readTime: data.readTime || '5 min read',
+      author: data.author || 'Anonymous',
+      slug
+    };
     
-    for (const line of lines) {
-      if (!line.trim()) continue; // Skip empty lines
-      
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        const key = line.substring(0, colonIndex).trim();
-        let value = line.substring(colonIndex + 1).trim();
-        
-        // Remove quotes if present
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.substring(1, value.length - 1);
-        }
-        
-        metadata[key] = value;
-      }
-    }
-    
-    console.log(`Successfully parsed markdown file: ${path}`, { metadata });
-    return { metadata, content };
+    console.log(`Successfully parsed markdown file: ${filepath}`, { metadata });
+    return { metadata, content: markdownContent };
   } catch (error) {
-    console.error('Error reading markdown file:', error);
+    console.error(`Error parsing markdown file: ${filepath}`, error);
     return null;
   }
 }
@@ -68,40 +53,21 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
 export async function fetchAllPosts(): Promise<PostMetadata[]> {
   try {
     console.log('fetchAllPosts called');
-    // List all markdown files in the blogposts directory
-    const files = [
-      { filename: 'javascript-basics.md' },
-      { filename: 'react-hooks-explained.md' },
-      { filename: 'css-grid-tutorial.md' },
-      { filename: 'typescript-guide.md' },
-      { filename: 'nodejs-best-practices.md' },
-      { filename: 'web-accessibility.md' },
-      { filename: 'responsive-design.md' },
-      { filename: 'git-workflow.md' },
-      { filename: 'python-for-beginners.md' },
-      { filename: 'react-best-practices.md' }
-    ];
-    
     const posts: PostMetadata[] = [];
     
     // Add index to generate unique IDs for posts
     let index = 1;
     
-    for (const file of files) {
-      const path = `${BASE_URL}/${file.filename}`;
-      console.log(`Trying to fetch: ${path}`);
-      const result = await readMarkdownFile(path);
+    // Parse all markdown files
+    for (const [filepath, content] of Object.entries(markdownFiles)) {
+      console.log(`Processing file: ${filepath}`);
+      const result = parseMarkdownFile(filepath, content);
       
       if (result) {
-        const slug = generateSlug(file.filename);
         posts.push({
           ...result.metadata,
-          id: index++, // Add an ID for each post
-          slug,
-          category: result.metadata.category || 'Uncategorized'
-        } as PostMetadata);
-      } else {
-        console.warn(`Failed to parse markdown file: ${file.filename}`);
+          id: index++
+        });
       }
     }
     
@@ -119,24 +85,27 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
 export async function fetchPostBySlug(slug: string): Promise<Post | null> {
   try {
     console.log(`fetchPostBySlug called for slug: ${slug}`);
-    // For simplicity, we'll map slugs directly to filenames
-    const path = `${BASE_URL}/${slug}.md`;
     
-    const result = await readMarkdownFile(path);
-    if (!result) {
-      return null;
+    // Look for a matching file
+    for (const [filepath, content] of Object.entries(markdownFiles)) {
+      const fileSlug = generateSlug(filepath);
+      
+      if (fileSlug === slug) {
+        console.log(`Found matching file for slug ${slug}: ${filepath}`);
+        const result = parseMarkdownFile(filepath, content);
+        
+        if (result) {
+          return {
+            ...result.metadata,
+            id: 1, // Simple ID assignment
+            content: result.content
+          };
+        }
+      }
     }
     
-    // Generate a consistent ID for the post
-    const postId = 1; // In a real app, this would be more sophisticated
-    
-    return {
-      ...result.metadata,
-      id: postId,
-      slug,
-      category: result.metadata.category || 'Uncategorized',
-      content: result.content
-    } as Post;
+    console.error(`No matching file found for slug: ${slug}`);
+    return null;
   } catch (error) {
     console.error(`Error fetching post with slug ${slug}:`, error);
     return null;
@@ -148,6 +117,7 @@ export async function fetchPostsByCategory(category: string): Promise<PostMetada
   try {
     console.log(`fetchPostsByCategory called for category: ${category}`);
     const allPosts = await fetchAllPosts();
+    
     // Normalize category names for comparison (convert to lowercase, replace hyphens with spaces)
     const normalizedCategory = category.toLowerCase().replace(/-/g, ' ');
     
