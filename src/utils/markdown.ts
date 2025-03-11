@@ -22,6 +22,7 @@ export async function getAllPosts(): Promise<PostMetadata[]> {
     console.log('Fetching all posts...');
     const response = await fetch('/api/posts');
     if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
@@ -38,6 +39,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     console.log(`Fetching post with slug: ${slug}`);
     const response = await fetch(`/api/posts/${slug}`);
     if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
       throw new Error(`Post not found: ${slug}`);
     }
     const post = await response.json();
@@ -54,6 +56,7 @@ export async function getPostsByCategory(category: string): Promise<PostMetadata
     console.log(`Fetching posts for category: ${category}`);
     const response = await fetch(`/api/categories/${category}`);
     if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();

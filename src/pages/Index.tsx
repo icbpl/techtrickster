@@ -11,18 +11,27 @@ import { fetchAllPosts } from '@/server/mock-api';
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState<PostMetadata[]>([]);
+  const [error, setError] = useState<string | null>(null);
   
   // Fetch blog posts
   useEffect(() => {
     async function loadPosts() {
       setIsLoading(true);
+      setError(null);
       try {
         console.log("Loading posts from fetchAllPosts");
         const allPosts = await fetchAllPosts();
         console.log("Loaded posts:", allPosts);
+        
+        if (allPosts.length === 0) {
+          console.warn("No posts were loaded from the API");
+          setError("No posts found. Please check if the blog post files exist in the public directory.");
+        }
+        
         setPosts(allPosts);
-      } catch (error) {
-        console.error('Error loading posts:', error);
+      } catch (err) {
+        console.error('Error loading posts:', err);
+        setError("Failed to load posts. Please check the console for more details.");
       } finally {
         setIsLoading(false);
       }
@@ -51,6 +60,14 @@ export default function Index() {
         <div className="mb-8">
           <AdPlaceholder size="728x90" className="mx-auto" />
         </div>
+        
+        {/* Error message */}
+        {error && !isLoading && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
+            <p className="font-bold">Error</p>
+            <p>{error}</p>
+          </div>
+        )}
         
         {/* Featured Articles Section */}
         <section className="mb-12">

@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import ArticleCard from './ArticleCard';
 import AdPlaceholder from '../ui/AdPlaceholder';
 import { cn } from '@/lib/utils';
+import { PostMetadata } from '@/utils/markdown';
 
 // Mock related posts data
-const mockRelatedPosts = [
+const mockRelatedPosts: PostMetadata[] = [
   {
     id: 1,
     title: "10 Essential CSS Tricks Every Developer Should Know",
@@ -14,7 +15,8 @@ const mockRelatedPosts = [
     slug: "essential-css-tricks",
     date: "May 15, 2023",
     readTime: "8 min read",
-    category: "CSS"
+    category: "CSS",
+    author: "Jane Smith" // Added author
   },
   {
     id: 2,
@@ -24,7 +26,8 @@ const mockRelatedPosts = [
     slug: "modern-react-setup",
     date: "June 2, 2023",
     readTime: "12 min read",
-    category: "React"
+    category: "React",
+    author: "John Doe" // Added author
   },
   {
     id: 3,
@@ -34,7 +37,8 @@ const mockRelatedPosts = [
     slug: "typescript-enterprise-patterns",
     date: "May 28, 2023",
     readTime: "15 min read",
-    category: "TypeScript"
+    category: "TypeScript",
+    author: "Emily Johnson" // Added author
   },
   {
     id: 4,
@@ -44,7 +48,8 @@ const mockRelatedPosts = [
     slug: "nodejs-performance-guide",
     date: "June 10, 2023",
     readTime: "10 min read",
-    category: "Node.js"
+    category: "Node.js",
+    author: "Alex Chen" // Added author
   }
 ];
 

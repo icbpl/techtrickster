@@ -31,9 +31,11 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/post/:slug" element={<Post />} />
             <Route path="/category/:category" element={<Category />} />
-            {/* Redirect /article/:slug to /post/:slug to maintain consistency */}
-            <Route path="/article/:slug" element={<Post />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Redirect /article/:slug to /post/:slug for consistency */}
+            <Route path="/article/:slug" element={<Navigate to={(location) => {
+              const slug = location.pathname.replace('/article/', '/post/');
+              return slug;
+            }} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
