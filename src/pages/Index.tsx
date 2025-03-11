@@ -17,7 +17,9 @@ export default function Index() {
     async function loadPosts() {
       setIsLoading(true);
       try {
+        console.log("Loading posts from fetchAllPosts");
         const allPosts = await fetchAllPosts();
+        console.log("Loaded posts:", allPosts);
         setPosts(allPosts);
       } catch (error) {
         console.error('Error loading posts:', error);
@@ -38,6 +40,9 @@ export default function Index() {
     acc[category].push(post);
     return acc;
   }, {});
+  
+  console.log("Posts by category:", postsByCategory);
+  console.log("Rendering Index page with", posts.length, "posts");
   
   return (
     <Layout>
@@ -71,11 +76,15 @@ export default function Index() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {posts.slice(0, 2).map((post) => (
                 <ArticleCard key={post.slug} article={post} variant="featured" />
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-6 border border-border rounded-lg">
+              <p className="text-muted-foreground">No articles found</p>
             </div>
           )}
         </section>
@@ -112,7 +121,7 @@ export default function Index() {
                     </div>
                   ))}
                 </div>
-              ) : (
+              ) : posts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* First 2 articles */}
                   {posts.slice(0, 2).map((post) => (
@@ -133,6 +142,10 @@ export default function Index() {
                     </div>
                   )}
                 </div>
+              ) : (
+                <div className="text-center py-6 border border-border rounded-lg">
+                  <p className="text-muted-foreground">No articles found</p>
+                </div>
               )}
             </section>
           </div>
@@ -144,28 +157,35 @@ export default function Index() {
         </div>
 
         {/* Category Sections */}
-        {!isLoading && Object.entries(postsByCategory).map(([category, categoryPosts]) => (
-          <section key={category} className="category-section mb-12">
-            <h2 className="category-title mb-6">
-              <Link to={`/category/${category.toLowerCase().replace(/\s+/g, '-')}`} className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
-                {category}
-              </Link>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-              {categoryPosts.slice(0, 4).map((post) => (
-                <ArticleCard key={post.slug} article={post} />
-              ))}
-            </div>
-            <div className="mt-8 flex justify-center">
-              <Link 
-                to={`/category/${category.toLowerCase().replace(/\s+/g, '-')}`}
-                className="px-4 py-2 text-sm font-medium rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
-              >
-                View All {category} Articles
-              </Link>
-            </div>
-          </section>
-        ))}
+        {!isLoading && Object.entries(postsByCategory).length > 0 ? (
+          Object.entries(postsByCategory).map(([category, categoryPosts]) => (
+            <section key={category} className="category-section mb-12">
+              <h2 className="category-title mb-6">
+                <Link to={`/category/${category.toLowerCase().replace(/\s+/g, '-')}`} className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
+                  {category}
+                </Link>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                {categoryPosts.slice(0, 4).map((post) => (
+                  <ArticleCard key={post.slug} article={post} />
+                ))}
+              </div>
+              <div className="mt-8 flex justify-center">
+                <Link 
+                  to={`/category/${category.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="px-4 py-2 text-sm font-medium rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
+                >
+                  View All {category} Articles
+                </Link>
+              </div>
+            </section>
+          ))
+        ) : !isLoading && (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-medium mb-4">No categories found</h3>
+            <p className="text-muted-foreground">Check back later for more content</p>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -2,7 +2,7 @@
 import matter from 'gray-matter';
 
 export interface PostMetadata {
-  id?: number; // Make id optional since it might not be present in markdown frontmatter
+  id?: number; // ID bersifat opsional
   title: string;
   date: string;
   excerpt: string;
@@ -19,9 +19,14 @@ export interface Post extends PostMetadata {
 
 export async function getAllPosts(): Promise<PostMetadata[]> {
   try {
+    console.log('Fetching all posts...');
     const response = await fetch('/api/posts');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
-    return data.posts;
+    console.log('Fetched posts data:', data);
+    return data.posts || [];
   } catch (error) {
     console.error('Failed to fetch posts:', error);
     return [];
@@ -30,11 +35,13 @@ export async function getAllPosts(): Promise<PostMetadata[]> {
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
+    console.log(`Fetching post with slug: ${slug}`);
     const response = await fetch(`/api/posts/${slug}`);
     if (!response.ok) {
       throw new Error(`Post not found: ${slug}`);
     }
     const post = await response.json();
+    console.log('Fetched post data:', post);
     return post;
   } catch (error) {
     console.error(`Failed to fetch post with slug ${slug}:`, error);
@@ -44,9 +51,14 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function getPostsByCategory(category: string): Promise<PostMetadata[]> {
   try {
+    console.log(`Fetching posts for category: ${category}`);
     const response = await fetch(`/api/categories/${category}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
-    return data.posts;
+    console.log('Fetched category posts data:', data);
+    return data.posts || [];
   } catch (error) {
     console.error(`Failed to fetch posts for category ${category}:`, error);
     return [];

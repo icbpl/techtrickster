@@ -14,8 +14,10 @@ function generateSlug(filename: string): string {
 // Function to read and parse a markdown file
 async function readMarkdownFile(path: string): Promise<{ metadata: any, content: string } | null> {
   try {
+    console.log(`Attempting to fetch markdown file at: ${path}`);
     const response = await fetch(path);
     if (!response.ok) {
+      console.error(`Failed to fetch markdown file: ${path}, status: ${response.status}`);
       throw new Error(`Failed to fetch markdown file: ${path}`);
     }
     const text = await response.text();
@@ -25,6 +27,7 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
     const match = text.match(pattern);
     
     if (!match) {
+      console.error(`No front matter found in: ${path}`);
       return null;
     }
     
@@ -44,6 +47,7 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
       }
     }
     
+    console.log(`Successfully parsed markdown file: ${path}`, { metadata });
     return { metadata, content };
   } catch (error) {
     console.error('Error reading markdown file:', error);
@@ -54,9 +58,9 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
 // Get all blog posts
 export async function fetchAllPosts(): Promise<PostMetadata[]> {
   try {
+    console.log('fetchAllPosts called');
     // This would normally be a server-side operation to scan directories
     // For this example, we'll hardcode the structure we created
-    const categories = ['web-development', 'javascript'];
     const files = [
       { category: 'web-development', filename: 'react-best-practices.md' },
       { category: 'javascript', filename: 'async-await-tutorial.md' }
@@ -77,9 +81,12 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
           ...result.metadata,
           id: index++, // Add an ID for each post
           slug,
+          category: file.category // Ensure category is set correctly
         } as PostMetadata);
       }
     }
+    
+    console.log(`Found ${posts.length} posts:`, posts);
     
     // Sort by date (newest first)
     return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -92,18 +99,26 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
 // Get a specific post by slug
 export async function fetchPostBySlug(slug: string): Promise<Post | null> {
   try {
+    console.log(`fetchPostBySlug called for slug: ${slug}`);
     // This mapping would normally be done on the server
-    const slugToPath: Record<string, string> = {
-      'react-best-practices': `${BASE_URL}/web-development/react-best-practices.md`,
-      'async-await-tutorial': `${BASE_URL}/javascript/async-await-tutorial.md`
+    const slugToPath: Record<string, { path: string, category: string }> = {
+      'react-best-practices': { 
+        path: `${BASE_URL}/web-development/react-best-practices.md`,
+        category: 'web-development' 
+      },
+      'async-await-tutorial': { 
+        path: `${BASE_URL}/javascript/async-await-tutorial.md`,
+        category: 'javascript'
+      }
     };
     
-    const path = slugToPath[slug];
-    if (!path) {
+    const fileInfo = slugToPath[slug];
+    if (!fileInfo) {
+      console.error(`No path mapping found for slug: ${slug}`);
       return null;
     }
     
-    const result = await readMarkdownFile(path);
+    const result = await readMarkdownFile(fileInfo.path);
     if (!result) {
       return null;
     }
@@ -115,6 +130,7 @@ export async function fetchPostBySlug(slug: string): Promise<Post | null> {
       ...result.metadata,
       id: postId,
       slug,
+      category: fileInfo.category, // Ensure category is set correctly
       content: result.content
     } as Post;
   } catch (error) {
@@ -126,10 +142,14 @@ export async function fetchPostBySlug(slug: string): Promise<Post | null> {
 // Get posts by category
 export async function fetchPostsByCategory(category: string): Promise<PostMetadata[]> {
   try {
+    console.log(`fetchPostsByCategory called for category: ${category}`);
     const allPosts = await fetchAllPosts();
-    return allPosts.filter(post => 
-      post.category.toLowerCase().replace(/\s+/g, '-') === category.toLowerCase()
+    const filteredPosts = allPosts.filter(post => 
+      post.category.toLowerCase() === category.toLowerCase()
     );
+    
+    console.log(`Found ${filteredPosts.length} posts in category '${category}'`);
+    return filteredPosts;
   } catch (error) {
     console.error(`Error fetching posts for category ${category}:`, error);
     return [];

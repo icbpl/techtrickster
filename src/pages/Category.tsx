@@ -19,7 +19,9 @@ export default function Category() {
       
       setIsLoading(true);
       try {
+        console.log(`Loading posts for category: ${category}`);
         const postsData = await fetchPostsByCategory(category);
+        console.log(`Found ${postsData.length} posts for category ${category}:`, postsData);
         setPosts(postsData);
       } catch (error) {
         console.error('Error loading category posts:', error);
@@ -30,6 +32,8 @@ export default function Category() {
     
     loadPosts();
   }, [category]);
+  
+  console.log(`Rendering Category page for '${category}' with ${posts.length} posts`);
   
   return (
     <Layout>
