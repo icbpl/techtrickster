@@ -22,12 +22,14 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
     }
     const text = await response.text();
     
-    // Extract front matter and content
-    const pattern = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+    // Extract front matter and content with improved regex pattern
+    // This regex accounts for Windows line endings and other edge cases
+    const pattern = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/;
     const match = text.match(pattern);
     
     if (!match) {
-      console.error(`No front matter found in: ${path}`);
+      console.error(`No front matter found in: ${path}, checking file content...`);
+      console.log(`File content preview: ${text.substring(0, 150)}...`);
       return null;
     }
     
@@ -36,14 +38,22 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
     
     // Parse front matter
     const metadata: Record<string, string> = {};
-    const lines = frontMatter.split('\n');
+    const lines = frontMatter.split(/\r?\n/);
     
     for (const line of lines) {
-      const [key, ...valueParts] = line.split(':');
-      if (key && valueParts.length) {
-        const value = valueParts.join(':').trim();
+      if (!line.trim()) continue; // Skip empty lines
+      
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        const key = line.substring(0, colonIndex).trim();
+        let value = line.substring(colonIndex + 1).trim();
+        
         // Remove quotes if present
-        metadata[key.trim()] = value.replace(/^"(.*)"$/, '$1');
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.substring(1, value.length - 1);
+        }
+        
+        metadata[key] = value;
       }
     }
     
@@ -59,11 +69,9 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
 export async function fetchAllPosts(): Promise<PostMetadata[]> {
   try {
     console.log('fetchAllPosts called');
-    // This would normally be a server-side operation to scan directories
-    // For this example, we'll hardcode the structure we created
+    // We need to access the files directly in the public directory
     const files = [
-      { category: 'web-development', filename: 'react-best-practices.md' },
-      { category: 'javascript', filename: 'async-await-tutorial.md' }
+      { filename: 'react-best-practices.md' }
     ];
     
     const posts: PostMetadata[] = [];
@@ -72,7 +80,8 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
     let index = 1;
     
     for (const file of files) {
-      const path = `${BASE_URL}/${file.category}/${file.filename}`;
+      const path = `${BASE_URL}/${file.filename}`;
+      console.log(`Trying to fetch: ${path}`);
       const result = await readMarkdownFile(path);
       
       if (result) {
@@ -81,8 +90,10 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
           ...result.metadata,
           id: index++, // Add an ID for each post
           slug,
-          category: file.category // Ensure category is set correctly
+          category: result.metadata.category || 'Uncategorized'
         } as PostMetadata);
+      } else {
+        console.warn(`Failed to parse markdown file: ${file.filename}`);
       }
     }
     
@@ -100,37 +111,22 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
 export async function fetchPostBySlug(slug: string): Promise<Post | null> {
   try {
     console.log(`fetchPostBySlug called for slug: ${slug}`);
-    // This mapping would normally be done on the server
-    const slugToPath: Record<string, { path: string, category: string }> = {
-      'react-best-practices': { 
-        path: `${BASE_URL}/web-development/react-best-practices.md`,
-        category: 'web-development' 
-      },
-      'async-await-tutorial': { 
-        path: `${BASE_URL}/javascript/async-await-tutorial.md`,
-        category: 'javascript'
-      }
-    };
+    // For simplicity, we'll map slugs directly to filenames
+    const path = `${BASE_URL}/${slug}.md`;
     
-    const fileInfo = slugToPath[slug];
-    if (!fileInfo) {
-      console.error(`No path mapping found for slug: ${slug}`);
-      return null;
-    }
-    
-    const result = await readMarkdownFile(fileInfo.path);
+    const result = await readMarkdownFile(path);
     if (!result) {
       return null;
     }
     
     // Generate a consistent ID for the post
-    const postId = Object.keys(slugToPath).indexOf(slug) + 1;
+    const postId = 1; // In a real app, this would be more sophisticated
     
     return {
       ...result.metadata,
       id: postId,
       slug,
-      category: fileInfo.category, // Ensure category is set correctly
+      category: result.metadata.category || 'Uncategorized',
       content: result.content
     } as Post;
   } catch (error) {
@@ -144,9 +140,13 @@ export async function fetchPostsByCategory(category: string): Promise<PostMetada
   try {
     console.log(`fetchPostsByCategory called for category: ${category}`);
     const allPosts = await fetchAllPosts();
-    const filteredPosts = allPosts.filter(post => 
-      post.category.toLowerCase() === category.toLowerCase()
-    );
+    // Normalize category names for comparison (convert to lowercase, replace hyphens with spaces)
+    const normalizedCategory = category.toLowerCase().replace(/-/g, ' ');
+    
+    const filteredPosts = allPosts.filter(post => {
+      const postCategory = post.category.toLowerCase();
+      return postCategory === normalizedCategory;
+    });
     
     console.log(`Found ${filteredPosts.length} posts in category '${category}'`);
     return filteredPosts;
