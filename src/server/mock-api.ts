@@ -22,8 +22,7 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
     }
     const text = await response.text();
     
-    // Extract front matter and content with improved regex pattern
-    // This regex accounts for Windows line endings and other edge cases
+    // Extract front matter and content
     const pattern = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/;
     const match = text.match(pattern);
     
@@ -69,8 +68,17 @@ async function readMarkdownFile(path: string): Promise<{ metadata: any, content:
 export async function fetchAllPosts(): Promise<PostMetadata[]> {
   try {
     console.log('fetchAllPosts called');
-    // We need to access the files directly in the public directory
+    // List all markdown files in the blogposts directory
     const files = [
+      { filename: 'javascript-basics.md' },
+      { filename: 'react-hooks-explained.md' },
+      { filename: 'css-grid-tutorial.md' },
+      { filename: 'typescript-guide.md' },
+      { filename: 'nodejs-best-practices.md' },
+      { filename: 'web-accessibility.md' },
+      { filename: 'responsive-design.md' },
+      { filename: 'git-workflow.md' },
+      { filename: 'python-for-beginners.md' },
       { filename: 'react-best-practices.md' }
     ];
     
