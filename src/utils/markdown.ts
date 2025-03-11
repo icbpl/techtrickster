@@ -2,6 +2,7 @@
 import matter from 'gray-matter';
 
 export interface PostMetadata {
+  id?: number; // Make id optional since it might not be present in markdown frontmatter
   title: string;
   date: string;
   excerpt: string;

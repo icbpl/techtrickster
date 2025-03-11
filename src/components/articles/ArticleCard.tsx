@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 interface ArticleCardProps {
   article: {
-    id: number;
+    id?: number; // Make id optional
     title: string;
     excerpt: string;
     cover: string;

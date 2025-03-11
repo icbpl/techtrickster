@@ -1,9 +1,10 @@
 
 import ArticleCard from '../articles/ArticleCard';
 import AdPlaceholder from '../ui/AdPlaceholder';
+import { PostMetadata } from '@/utils/markdown';
 
 interface SidebarProps {
-  articles: any[];
+  articles: PostMetadata[];
 }
 
 export default function Sidebar({ articles }: SidebarProps) {
@@ -20,7 +21,7 @@ export default function Sidebar({ articles }: SidebarProps) {
         </h3>
         <div className="divide-y divide-border">
           {articles.slice(0, 4).map((article) => (
-            <div key={article.id} className="p-4">
+            <div key={article.slug} className="p-4">
               <ArticleCard article={article} variant="compact" className="border-0 bg-transparent" />
             </div>
           ))}

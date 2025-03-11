@@ -64,6 +64,9 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
     
     const posts: PostMetadata[] = [];
     
+    // Add index to generate unique IDs for posts
+    let index = 1;
+    
     for (const file of files) {
       const path = `${BASE_URL}/${file.category}/${file.filename}`;
       const result = await readMarkdownFile(path);
@@ -72,6 +75,7 @@ export async function fetchAllPosts(): Promise<PostMetadata[]> {
         const slug = generateSlug(file.filename);
         posts.push({
           ...result.metadata,
+          id: index++, // Add an ID for each post
           slug,
         } as PostMetadata);
       }
@@ -104,8 +108,12 @@ export async function fetchPostBySlug(slug: string): Promise<Post | null> {
       return null;
     }
     
+    // Generate a consistent ID for the post
+    const postId = Object.keys(slugToPath).indexOf(slug) + 1;
+    
     return {
       ...result.metadata,
+      id: postId,
       slug,
       content: result.content
     } as Post;

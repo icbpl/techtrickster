@@ -21,6 +21,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/post/:slug" element={<Post />} />
           <Route path="/category/:category" element={<Category />} />
+          {/* Make sure the article path is included */}
+          <Route path="/article/:slug" element={<Post />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
