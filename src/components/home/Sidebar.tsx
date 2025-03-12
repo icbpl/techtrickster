@@ -1,6 +1,7 @@
 
 import AdPlaceholder from '../ui/AdPlaceholder';
 import PopularArticles from './PopularArticles';
+import SidebarCategories from './SidebarCategories';
 import { PostMetadata } from '@/utils/markdown';
 
 interface SidebarProps {
@@ -16,6 +17,11 @@ export default function Sidebar({ articles }: SidebarProps) {
       
       {/* Popular Articles */}
       <PopularArticles articles={articles} />
+      
+      {/* Categories */}
+      <div className="mt-8">
+        <SidebarCategories />
+      </div>
     </div>
   );
 }
