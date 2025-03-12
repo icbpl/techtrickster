@@ -14,35 +14,54 @@ function generateSlug(filepath: string): string {
     .replace('.md', '');
 }
 
+// Polyfill for Buffer in browser environments
+const bufferPolyfill = {
+  from: (content: string) => ({
+    toString: () => content
+  })
+};
+
 // Function to parse a markdown file
 function parseMarkdownFile(filepath: string, content: string): { metadata: PostMetadata, content: string } | null {
   try {
     console.log(`Parsing markdown file: ${filepath}`);
     
-    // Use gray-matter to parse frontmatter
-    const { data, content: markdownContent } = matter(content);
+    // Override gray-matter's Buffer usage with our polyfill
+    const oldBuffer = global.Buffer;
+    (global as any).Buffer = bufferPolyfill;
     
-    if (!data.title) {
-      console.error(`Missing required frontmatter in: ${filepath}`);
-      return null;
+    try {
+      // Use gray-matter to parse frontmatter
+      const { data, content: markdownContent } = matter(content);
+      
+      if (!data.title) {
+        console.error(`Missing required frontmatter in: ${filepath}`);
+        return null;
+      }
+      
+      const slug = generateSlug(filepath);
+      
+      const metadata: PostMetadata = {
+        title: data.title,
+        date: data.date,
+        excerpt: data.excerpt || '',
+        cover: data.cover || 'https://placehold.co/600x400/png',
+        category: data.category || 'Uncategorized',
+        readTime: data.readTime || '5 min read',
+        author: data.author || 'Anonymous',
+        slug
+      };
+      
+      console.log(`Successfully parsed markdown file: ${filepath}`, { metadata });
+      return { metadata, content: markdownContent };
+    } finally {
+      // Restore original Buffer if it existed
+      if (oldBuffer) {
+        (global as any).Buffer = oldBuffer;
+      } else {
+        delete (global as any).Buffer;
+      }
     }
-    
-    const slug = generateSlug(filepath);
-    
-    const metadata: PostMetadata = {
-      ...data,
-      title: data.title,
-      date: data.date,
-      excerpt: data.excerpt || '',
-      cover: data.cover || '',
-      category: data.category || 'Uncategorized',
-      readTime: data.readTime || '5 min read',
-      author: data.author || 'Anonymous',
-      slug
-    };
-    
-    console.log(`Successfully parsed markdown file: ${filepath}`, { metadata });
-    return { metadata, content: markdownContent };
   } catch (error) {
     console.error(`Error parsing markdown file: ${filepath}`, error);
     return null;

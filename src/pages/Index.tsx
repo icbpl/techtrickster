@@ -19,12 +19,12 @@ export default function Index() {
       setIsLoading(true);
       setError(null);
       try {
-        console.log("Loading posts from fetchAllPosts");
+        console.log("Loading posts directly from fetchAllPosts");
         const allPosts = await fetchAllPosts();
         console.log("Loaded posts:", allPosts);
         
         if (allPosts.length === 0) {
-          console.warn("No posts were loaded from the API");
+          console.warn("No posts were loaded");
           setError("No posts found. Please check if the blog post files exist in the public directory.");
         }
         
