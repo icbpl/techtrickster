@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} - {{ .Site.Title }}{{ end }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
+  <meta name="author" content="{{ .Site.Title }}">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} - {{ .Site.Title }}{{ end }}">
+  <meta property="og:description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
+  <meta property="og:image" content="{{ .Site.BaseURL }}og-image.png">
+  <meta property="og:url" content="{{ .Permalink }}">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ "css/styles.css" | relURL }}">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="{{ "favicon.ico" | relURL }}">
+</head>
+<body>
+  <div id="root" class="flex flex-col min-h-screen">
+    {{ partial "header.html" . }}
+    <main class="flex-grow pt-16">
+      {{ block "main" . }}{{ end }}
+    </main>
+    {{ partial "footer.html" . }}
+  </div>
+  
+  <!-- Scripts -->
+  <script src="{{ "js/theme.js" | relURL }}"></script>
+  <script src="{{ "js/search.js" | relURL }}"></script>
+  <script src="{{ "js/scroll.js" | relURL }}"></script>
+  <script src="{{ "js/menu.js" | relURL }}"></script>
+</body>
+</html>

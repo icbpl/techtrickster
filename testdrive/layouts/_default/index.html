@@ -1,0 +1,33 @@
+
+{{ define "main" }}
+<div class="container mx-auto px-4 py-8">
+  <!-- Above the fold - Top Ad Banner -->
+  <div class="mb-8">
+    {{ partial "ad-placeholder.html" (dict "size" "728x90" "class" "mx-auto") }}
+  </div>
+  
+  <!-- Featured Articles Section -->
+  {{ partial "featured-articles.html" . }}
+  
+  <!-- Ad Placeholder -->
+  <section class="mb-12">
+    {{ partial "ad-placeholder.html" (dict "size" "responsive" "class" "mx-auto h-24 md:h-28") }}
+  </section>
+  
+  <!-- Main Content Area -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+    <!-- Main Articles Column -->
+    <div class="lg:col-span-8">
+      {{ partial "recent-articles.html" . }}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="lg:col-span-4">
+      {{ partial "sidebar.html" . }}
+    </div>
+  </div>
+  
+  <!-- Category Sections -->
+  {{ partial "category-sections.html" . }}
+</div>
+{{ end }}
