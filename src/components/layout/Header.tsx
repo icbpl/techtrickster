@@ -1,11 +1,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from '../ui/ThemeToggle';
 import SearchBar from '../ui/SearchBar';
 import ScrollProgress from '../ui/ScrollProgress';
+import MobileMenu from './MobileMenu';
+import MegaMenu from './MegaMenu';
+import DesktopNavigation from './DesktopNavigation';
 
 // Mock categories data
 const categories = [
@@ -65,6 +67,11 @@ export default function Header() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isMegaMenuOpen]);
+
+  const toggleMegaMenu = () => setIsMegaMenuOpen(!isMegaMenuOpen);
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const closeMegaMenu = () => setIsMegaMenuOpen(false);
   
   return (
     <>
@@ -76,26 +83,11 @@ export default function Header() {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2">
-            <button
-              ref={megaMenuTriggerRef}
-              className="flex items-center px-3 py-2 rounded-md hover:bg-secondary transition-colors"
-              onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
-              aria-expanded={isMegaMenuOpen}
-              aria-controls="mega-menu"
-            >
-              Kategori
-              <ChevronDown className={cn("ml-1 h-4 w-4 transition-transform", isMegaMenuOpen ? "rotate-180" : "")} />
-            </button>
-            
-            <Link to="/tutorials" className="px-3 py-2 rounded-md hover:bg-secondary transition-colors">
-              Tutorials
-            </Link>
-            
-            <Link to="/tips-tricks" className="px-3 py-2 rounded-md hover:bg-secondary transition-colors">
-              Tips & Tricks
-            </Link>
-          </nav>
+          <DesktopNavigation 
+            isMegaMenuOpen={isMegaMenuOpen} 
+            toggleMegaMenu={toggleMegaMenu}
+            megaMenuTriggerRef={megaMenuTriggerRef}
+          />
           
           {/* Right Side Actions */}
           <div className="flex items-center gap-1">
@@ -105,7 +97,7 @@ export default function Header() {
             {/* Mobile Menu Toggle */}
             <button
               className={cn("md:hidden p-2 rounded-md hover:bg-secondary transition-colors hamburger", isMobileMenuOpen ? "active" : "")}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={toggleMobileMenu}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
@@ -117,91 +109,19 @@ export default function Header() {
           </div>
         </div>
         
-        {/* Mobile Menu */}
-        <div
-          id="mobile-menu"
-          className={cn(
-            "md:hidden fixed inset-0 pt-14 bg-background z-40 transition-transform duration-300 ease-in-out",
-            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          )}
-        >
-          <div className="container mx-auto p-4 flex flex-col gap-4">
-            <Link 
-              to="/" 
-              className="flex items-center px-4 py-3 rounded-md hover:bg-secondary transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/categories" 
-              className="flex items-center px-4 py-3 rounded-md hover:bg-secondary transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Categories
-            </Link>
-            <Link 
-              to="/tutorials" 
-              className="flex items-center px-4 py-3 rounded-md hover:bg-secondary transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Tutorials
-            </Link>
-            <Link 
-              to="/tips-tricks" 
-              className="flex items-center px-4 py-3 rounded-md hover:bg-secondary transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Tips & Tricks
-            </Link>
-            <Link 
-              to="/about" 
-              className="flex items-center px-4 py-3 rounded-md hover:bg-secondary transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-          </div>
-        </div>
+        {/* Mobile Menu - Now using the component */}
+        <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
         
-        {/* Mega Menu */}
-        <div
-          id="mega-menu"
-          ref={megaMenuRef}
-          className={cn("mega-menu py-6", isMegaMenuOpen ? "open" : "")}
-        >
-          <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {categories.map((category, index) => (
-              <div key={index} className="flex flex-col gap-2 animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                <h3 className="font-semibold text-lg mb-2">{category.title}</h3>
-                <ul className="flex flex-col gap-1">
-                  {category.subcategories.map((subcategory, subIndex) => (
-                    <li key={subIndex}>
-                      <Link 
-                        to={`/category/${subcategory.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="block px-2 py-1.5 rounded-md hover:bg-secondary transition-colors"
-                        onClick={() => setIsMegaMenuOpen(false)}
-                      >
-                        {subcategory}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Mega Menu - Now using the component */}
+        <MegaMenu 
+          isOpen={isMegaMenuOpen} 
+          categories={categories} 
+          onClose={closeMegaMenu}
+          megaMenuRef={megaMenuRef}
+        />
         
         <ScrollProgress />
       </header>
-      
-      {/* Page overlay when mobile menu is open */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
     </>
   );
 }
