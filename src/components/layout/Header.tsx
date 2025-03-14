@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import ThemeToggle from '../ui/ThemeToggle';
-import SearchBar from '../ui/SearchBar';
+import SearchBar from '../ui/search/SearchBar';
 import ScrollProgress from '../ui/ScrollProgress';
 import MobileMenu from './MobileMenu';
 import MegaMenu from './MegaMenu';
