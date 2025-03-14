@@ -1,79 +1,72 @@
 
 import { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
-import ErrorMessage from '../components/ui/ErrorMessage';
-import AdBanner from '../components/home/AdBanner';
-import FeaturedArticlesSection from '../components/home/FeaturedArticlesSection';
-import MainContent from '../components/home/MainContent';
-import CategorySections from '../components/home/CategorySections';
-import { PostMetadata } from '@/utils/markdown';
-import { fetchAllPosts } from '@/server/mock-api';
+import AdPlaceholder from '../components/ui/AdPlaceholder';
+import FeaturedArticles from '../components/home/FeaturedArticles';
+import RecentArticles from '../components/home/RecentArticles';
+import Sidebar from '../components/home/Sidebar';
+import CategorySection from '../components/home/CategorySection';
+import { 
+  mockFeaturedArticles, 
+  mockRecentArticles, 
+  categoryArticles 
+} from '../components/home/data/mockData';
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
-  const [posts, setPosts] = useState<PostMetadata[]>([]);
-  const [error, setError] = useState<string | null>(null);
   
-  // Fetch blog posts
+  // Simulate loading state
   useEffect(() => {
-    async function loadPosts() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        console.log("Loading posts directly from fetchAllPosts");
-        const allPosts = await fetchAllPosts();
-        console.log("Loaded posts:", allPosts);
-        
-        if (allPosts.length === 0) {
-          console.warn("No posts were loaded");
-          setError("No posts found. Please check if the blog post files exist in the public directory.");
-        }
-        
-        setPosts(allPosts);
-      } catch (err) {
-        console.error('Error loading posts:', err);
-        setError("Failed to load posts. Please check the console for more details.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
     
-    loadPosts();
+    return () => clearTimeout(timer);
   }, []);
-  
-  // Group posts by category
-  const postsByCategory = posts.reduce((acc: Record<string, PostMetadata[]>, post) => {
-    const category = post.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(post);
-    return acc;
-  }, {});
-  
-  console.log("Posts by category:", postsByCategory);
-  console.log("Rendering Index page with", posts.length, "posts");
   
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Above the fold - Top Ad Banner */}
-        <AdBanner size="728x90" position="top" />
-        
-        {/* Error message */}
-        <ErrorMessage error={error} />
+        <div className="mb-8">
+          <AdPlaceholder size="728x90" className="mx-auto" />
+        </div>
         
         {/* Featured Articles Section */}
-        <FeaturedArticlesSection isLoading={isLoading} posts={posts} />
+        <FeaturedArticles 
+          articles={mockFeaturedArticles} 
+          isLoading={isLoading} 
+        />
         
-        {/* Ad Banner */}
-        <AdBanner size="responsive" className="mx-auto h-24 md:h-28" />
+        {/* Ad Placeholder instead of Trending Categories */}
+        <section className="mb-12">
+          <AdPlaceholder size="responsive" className="mx-auto h-24 md:h-28" />
+        </section>
         
         {/* Main Content Area */}
-        <MainContent isLoading={isLoading} posts={posts} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          {/* Main Articles Column */}
+          <div className="lg:col-span-8">
+            <RecentArticles 
+              articles={mockRecentArticles} 
+              isLoading={isLoading} 
+            />
+          </div>
+          
+          {/* Sidebar */}
+          <div className="lg:col-span-4">
+            <Sidebar articles={mockRecentArticles} />
+          </div>
+        </div>
 
         {/* Category Sections */}
-        <CategorySections isLoading={isLoading} postsByCategory={postsByCategory} />
+        {!isLoading && Object.entries(categoryArticles).map(([category, articles]) => (
+          <CategorySection 
+            key={category}
+            category={category}
+            articles={articles}
+          />
+        ))}
       </div>
     </Layout>
   );

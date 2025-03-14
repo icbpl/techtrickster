@@ -2,10 +2,18 @@
 import { Link } from 'react-router-dom';
 import { CalendarDays, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PostMetadata } from '@/utils/markdown';
 
 interface ArticleCardProps {
-  article: PostMetadata;
+  article: {
+    id: number;
+    title: string;
+    excerpt: string;
+    cover: string;
+    slug: string;
+    date: string;
+    readTime: string;
+    category: string;
+  };
   variant?: 'default' | 'featured' | 'compact';
   className?: string;
 }
@@ -22,7 +30,7 @@ export default function ArticleCard({ article, variant = 'default', className }:
     >
       {/* Article Image */}
       <Link 
-        to={`/post/${article.slug}`} 
+        to={`/article/${article.slug}`} 
         className={cn(
           "article-image block overflow-hidden", 
           variant === 'featured' ? "h-full" : (variant === 'compact' ? "flex-shrink-0 w-24 h-24" : "aspect-video"),
@@ -58,7 +66,7 @@ export default function ArticleCard({ article, variant = 'default', className }:
           variant === 'featured' ? "text-2xl mb-3" : (variant === 'compact' ? "text-base mb-1" : "text-lg mb-2")
         )}>
           <Link 
-            to={`/post/${article.slug}`} 
+            to={`/article/${article.slug}`} 
             className="hover:text-primary/90 transition-colors"
           >
             {article.title}
