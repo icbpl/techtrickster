@@ -24,7 +24,7 @@ menu:
 
 # Permalinks
 permalinks:
-  posts: "/:slug/"
+  posts: "/posts/:slug/"
   pages: "/:slug/"
 
 # Site parameters
