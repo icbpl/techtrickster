@@ -1,9 +1,0 @@
-
-{{ $size := .size }}
-{{ $class := default "" .class }}
-
-<div class="ad-placeholder {{ $class }} {{ if eq $size "728x90" }}h-[90px] w-[728px] max-w-full{{ else if eq $size "300x250" }}h-[250px] w-[300px]{{ else if eq $size "responsive" }}w-full h-32{{ end }}">
-  <div class="text-muted-foreground text-sm">
-    Advertisement
-  </div>
-</div>
