@@ -5,7 +5,7 @@ module.exports = {
   content: [
     "./layouts/**/*.html",
     "./content/**/*.md",
-    "./themes/oktrik-theme/layouts/**/*.html"
+    "./content/**/*.html"
   ],
   theme: {
     container: {

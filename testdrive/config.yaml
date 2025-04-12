@@ -2,7 +2,8 @@
 baseURL: "https://icbpl.github.io/techtrickster/"
 languageCode: "en-us"
 title: "OKTRIK"
-theme: "oktrik-theme"
+# Hapus referensi tema karena kita akan menggunakan layouts langsung
+# theme: "oktrik-theme"
 
 # Hugo configuration
 disableKinds: ["taxonomy", "term"]

@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "description": "OKTRIK Hugo site",
   "scripts": {
-    "dev": "hugo server -D",
-    "build": "hugo --minify",
-    "start": "hugo server",
+    "dev": "npm run build:css && hugo server -D --config=config.yaml",
+    "build": "npm run build:css && hugo --minify --config=config.yaml",
+    "start": "hugo server --config=config.yaml",
     "clean": "rm -rf public resources",
     "build:css": "tailwindcss -i ./assets/css/main.css -o ./static/css/styles.css"
   },
